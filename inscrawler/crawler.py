@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+
+import logging
 from builtins import open
 from selenium.webdriver.common.keys import Keys
 import traceback
@@ -18,6 +20,8 @@ from tqdm import tqdm
 import os
 import glob
 import sys
+
+logger = logging.getLogger(__name__)
 
 
 class Logging(object):
@@ -263,13 +267,19 @@ class InsCrawler(Logging):
                 self._fetch_post_with_key(cur_key, dict_post)
 
             except RetryException:
-                sys.stderr.write(
-                    '\x1b[1;31m' + 'Failed to fetch the post: ' + cur_key + '\x1b[0m' + '\n')
+                error_msg = '\x1b[1;31m' + 'Failed to fetch the post: ' + cur_key + '\x1b[0m' + '\n'
+                sys.stderr.write(error_msg)
+                logger.error(error_msg)
                 break
 
             except Exception:
-                sys.stderr.write(
-                    '\x1b[1;31m' + 'Failed to fetch the post: ' + cur_key + '\x1b[0m' + '\n')
+                error_msg = '\x1b[1;31m' + 'Failed to fetch the post: ' + cur_key + '\x1b[0m' + '\n'
+                tb = traceback.format_exc()
+                sys.stderr.write(error_msg)
+
+                # ErrorMessage and TrackbackMessage to Error log
+                logger.error(error_msg)
+                logger.error(tb)
                 traceback.print_exc()
 
             self.log(json.dumps(dict_post, ensure_ascii=False))
